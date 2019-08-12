@@ -32,7 +32,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    items = new List<String>.generate(10, (i) => "Item $i");
+    items = List<String>.generate(10, (i) => "Item $i");
 
     return Scaffold(
       appBar: AppBar(
@@ -46,30 +46,45 @@ class _MyHomePageState extends State<MyHomePage> {
           )
         ],
       ),
-      body: new ListView.builder(
+      body: ListView.separated(
         itemCount: items.length,
         itemBuilder: (context, index) {
-          return new Row(
-            children: <Widget>[
-              Expanded(
-                  //child: new Image.asset("images/car.jpg"),
-                  child: new Image(
-                image: new NetworkImage(
-                    "https://flutter.io/images/homepage/screenshot-2.png"),
-              )),
-              Expanded(
-                child: new Column(
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+            child: Row(
+              children: <Widget>[
+                Image.asset("images/ic_placeholder.png"),
+                SizedBox(
+                  width: 8,
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    new Text("什麼館"+items[index], style: TextStyle(fontSize: 24),),
-                    new SizedBox(height: 8,),
-                    new Text("詳細內容"+items[index]),
-                    new SizedBox(height: 8,),
-                    new Text("休館日"+items[index]),
-                    new SizedBox(height: 8,),
+                    Text(
+                      "什麼館" + items[index],
+                      style: TextStyle(fontSize: 24),
+                    ),
+                    SizedBox(
+                      height: 8,
+                    ),
+                    Text("詳細內容" + items[index]),
+                    SizedBox(
+                      height: 8,
+                    ),
+                    Text("休館日" + items[index]),
+                    SizedBox(
+                      height: 8,
+                    ),
                   ],
                 ),
-              ),
-            ],
+              ],
+            ),
+          );
+        },
+        separatorBuilder: (BuildContext context, int index) {
+          return Container(
+            color: Colors.black,
+            height: 2,
           );
         },
       ),
