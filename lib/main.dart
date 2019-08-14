@@ -31,18 +31,38 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  List<String> items;
+  @override
+  Widget build(BuildContext context) {
+    return new StoreListPage(widget: widget);
+  }
+}
+
+class StoreListPage extends StatefulWidget {
+  const StoreListPage({
+    Key key,
+    @required this.widget,
+  }) : super(key: key);
+
+  final MyHomePage widget;
+
+  @override
+  _StoreListPageState createState() => _StoreListPageState();
+}
+
+class _StoreListPageState extends State<StoreListPage> {
+  ZooData zooData;
+
+  @override
+  void initState() {
+    super.initState();
+    _getDataFromWeb();
+  }
 
   @override
   Widget build(BuildContext context) {
-
-    _fetch();
-
-    items = List<String>.generate(10, (i) => "Item $i");
-
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title),
+        title: Text(widget.widget.title),
         leading: Icon(Icons.dehaze),
         actions: <Widget>[
           // action button
@@ -52,53 +72,84 @@ class _MyHomePageState extends State<MyHomePage> {
           )
         ],
       ),
-      body: ListView.separated(
-        itemCount: items.length,
-        itemBuilder: (context, index) {
-          return Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-            child: Row(
+      body: _getListView(),
+    );
+  }
+
+  ListView _getListView() {
+    print('_getListView');
+
+    if (zooData == null) {
+      print('_getListView zooDat == null');
+
+      return null;
+    }
+
+    return ListView.separated(
+      itemCount: zooData.result.results.length,
+      itemBuilder: _getListItem,
+      separatorBuilder: (BuildContext context, int index) {
+        return Container(
+          color: Color(0xFFAACCAA),
+          height: 2,
+        );
+      },
+    );
+  }
+
+  Widget _getListItem(context, index) {
+    Results item = zooData.result.results[index];
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+      child: Row(
+        children: <Widget>[
+          //Image.asset("images/ic_placeholder.png"),
+          Image.network(item.ePicURL,
+              width: 100, height: 100, fit: BoxFit.fitHeight),
+
+          SizedBox(
+            width: 8,
+          ),
+
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                Image.asset("images/ic_placeholder.png"),
-                SizedBox(
-                  width: 8,
+                Text(
+                  item.eName,
+                  style: TextStyle(fontSize: 24),
                 ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Text(
-                      "什麼館" + items[index],
-                      style: TextStyle(fontSize: 24),
-                    ),
-                    SizedBox(
-                      height: 8,
-                    ),
-                    Text("詳細內容" + items[index]),
-                    SizedBox(
-                      height: 8,
-                    ),
-                    Text("休館日" + items[index]),
-                    SizedBox(
-                      height: 8,
-                    ),
-                  ],
+                SizedBox(
+                  height: 8,
+                ),
+                Text(
+                  item.eInfo,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                SizedBox(
+                  height: 8,
+                ),
+                Text(
+                  item.eMemo,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                SizedBox(
+                  height: 8,
                 ),
               ],
             ),
-          );
-        },
-        separatorBuilder: (BuildContext context, int index) {
-          return Container(
-            color: Colors.black,
-            height: 2,
-          );
-        },
+          ),
+        ],
       ),
     );
   }
 
-  _fetch() async {
-    var url = 'https://data.taipei/opendata/datalist/apiAccess?scope=resourceAquire&rid=5a0e5fbb-72f8-41c6-908e-2fb25eff9b8a';
+  _getDataFromWeb() async {
+    var url =
+        'https://data.taipei/opendata/datalist/apiAccess?scope=resourceAquire&rid=5a0e5fbb-72f8-41c6-908e-2fb25eff9b8a';
     var response = await http.get(url);
     print('Response status: ${response.statusCode}');
     //print('Response body: ${response.body}');
@@ -108,8 +159,12 @@ class _MyHomePageState extends State<MyHomePage> {
     String result = decoder.convert(response.bodyBytes);
     print('Response body: ${result}');
 
-    ZooData zooData = ZooData.fromJson(json.decode(result));
-    print('zooData: ${zooData.result.limit}');
+    //zooData = ZooData.fromJson(json.decode(result));
+    print('before setState');
+    setState(() {
+      zooData = ZooData.fromJson(json.decode(result));
 
+      print('in setState');
+    });
   }
 }
