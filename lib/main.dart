@@ -1,6 +1,9 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:taipei_zoo_flutter/zoo_data.dart';
 
 void main() => runApp(MyApp());
 
@@ -32,6 +35,9 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+
+    _fetch();
+
     items = List<String>.generate(10, (i) => "Item $i");
 
     return Scaffold(
@@ -89,5 +95,21 @@ class _MyHomePageState extends State<MyHomePage> {
         },
       ),
     );
+  }
+
+  _fetch() async {
+    var url = 'https://data.taipei/opendata/datalist/apiAccess?scope=resourceAquire&rid=5a0e5fbb-72f8-41c6-908e-2fb25eff9b8a';
+    var response = await http.get(url);
+    print('Response status: ${response.statusCode}');
+    //print('Response body: ${response.body}');
+
+    // 中文 Utf8 處理.
+    Utf8Decoder decoder = Utf8Decoder();
+    String result = decoder.convert(response.bodyBytes);
+    print('Response body: ${result}');
+
+    ZooData zooData = ZooData.fromJson(json.decode(result));
+    print('zooData: ${zooData.result.limit}');
+
   }
 }
